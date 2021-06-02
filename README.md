@@ -2,7 +2,7 @@
 
 This repo includes examples of K8s monitoring with the Elastic Stack in different ways for  a multi-container application in a K8s cluster. The application interface has been built using Python/Flask. The data component is using Redis. The application is instrumented with Prometheus Python Client to demonstrate a custom metric `cloud_votes`.
 
-##1. Pre-Requisites
+## 1. Pre-Requisites
 - Helm 3+
 - K8s cluster (The codes in this repo are tested on AKS)
 - Elastic Stack (7.13 or later)
@@ -12,10 +12,10 @@ This repo includes examples of K8s monitoring with the Elastic Stack in differen
     
 The easiest way to run the examples is spin up a managed K8s cluster and an Elastic Stack cluster on Elastic Cloud. The following procedure are assumed using AKS and Elastic Cloud.
 
-##2. Using CNCF projects
+## 2. Using CNCF projects
 This example uses Prometheus for metrics, Fluentd for logging, Elasticsearch for datastore, and Kibana for visualization.
 
-###2.1 Create container images
+### 2.1 Create container images
 Use the sample `docker-compose-cncf.yaml` file to create the container image, download the Redis image, and start the application.
 ```buildoutcfg
 docker-compose -f docker-compose-cncf.yaml up -d
@@ -33,7 +33,7 @@ Then, push images to registry with appropriate way for your registry.
 docker push <container_regsistry_name>/cloud-vote-front:v1
 ```
 
-###2.2 Deploy Fluentd
+### 2.2 Deploy Fluentd
 Fluentd ingests logs to `logstash-*` indices by default. Before running Fluentd, it's better to create an index template for `logstash-*` indices.
 ```buildoutcfg
 PUT _template/logstash
@@ -102,7 +102,7 @@ Once creating the ConfigMap, deploy Fluentd as a DaemonSet. Don't forget to chan
 # Deploy Fluentd
 kubectl create -f cncf-projects/fluentd-daemonset-elasticsearch-rbac.yaml
 ```
-###2.3 Deploy Metricbeat
+### 2.3 Deploy Metricbeat
 Before deploying Prometheus, we need to deploy Metricbeat as a Deployment so that we can ingest metrics from Prometheus to Elasticsearch. In this case, we use Prometheus module of Metricbeat https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-metricset-prometheus-remote_write.html.
 Don't forget to change the following environment variables related to Elasticsearch cluster in `cncf-projects/metricbeat-kubernetes-deployment.yaml`.
 ```buildoutcfg
@@ -124,13 +124,13 @@ env:
 # Deploy Metricbeat
 kubectl create -f cncf-projects/metricbeat-kubernetes-deployment.yaml
 ```
-###2.4 Deploy Prometheus
+### 2.4 Deploy Prometheus
 We can use Helm charts for deploying Prometheus here. In order to customize default behavior including enable remote_write, `cncf-projects/prometheus_custom.yaml` is used. Please refer to https://github.com/prometheus-community/helm-charts for more details.
 ```buildoutcfg
 helm install prometheus -n monitoring --create-namespace prometheus-community/prometheus -f cncf-projects/prometheus_custom.yaml
 ```
 
-###2.5 Deploy App
+### 2.5 Deploy App
 Finally, deploy Cloud Voting App. You need to change the image name in `cncf-projects/cloud-vote-all-in-one-redis-aks-prometheus.yaml` to the name pushed to your registry.
 ```buildoutcfg
 # Change image name in cncf-projects/cloud-vote-all-in-one-redis-aks-prometheus.yaml
@@ -147,13 +147,13 @@ Once App is running, you can get external IP with following command and access t
 ```buildoutcfg
 kubectl get service cloud-vote-front
 ```
-###2.6 Access to Kibana
+### 2.6 Access to Kibana
 Now, you can access to metrics and logs via Kibana. Find out metricbeat-* indices for metrics from Prometheus and logstash-* indices for logs from Fluentd.
 
-##3. Elastic way
+## 3. Elastic way
 This example fully utilizes the Elastic Stack capabilities, which includes Elasticsearch, Kibana, Beats and APM. 
 
-###3.1 Create container images
+### 3.1 Create container images
 Use the sample `docker-compose-elastic.yaml` file to create the container image, download the Redis image, and start the application. Because the app is instrumented with Elastic APM agent for collecting Prometheus custom metrics, you need to change APM related variables in `docker-compose-elastic.yaml`. The --build argument is used to instruct Docker Compose to re-create the application image.
 ```buildoutcfg
 # Change SECRET_TOKEN and SERVER_URL in docker-compose-elastic.yaml
@@ -185,7 +185,7 @@ Then, push images to registry with appropriate way for your registry.
 docker push <container_regsistry_name>/cloud-vote-front:v2
 ```
 
-###3.2 Deploy Filebeat
+### 3.2 Deploy Filebeat
 We use Filebeat for collecting all the logs as against the previous example which uses Fluentd. Filebeat is deployed as a DaemonSet. Please refer to https://www.elastic.co/guide/en/beats/filebeat/current/running-on-kubernetes.html for more details. Don't forget to change the following environment variables related to Elasticsearch cluster in `elastic/filebeat-kubernetes.yaml`.
 ```buildoutcfg
 # Change the followings in elastic/filebeat-kubernetes.yaml
@@ -206,7 +206,7 @@ env:
 # Deploy Metricbeat
 kubectl create -f elastic/filebeat-kubernetes.yaml
 ```
-###3.3 Deploy Metricbeat
+### 3.3 Deploy Metricbeat
 We use Metricbeat for collecting all the metrics as against the previous example which uses Prometheus. Before deploying Metricbeat, it's better to deploy `kube-state-metrics`. Please refer to https://github.com/kubernetes/kube-state-metrics for more details.
 ```buildoutcfg
 kubectl apply -f examples/standard
@@ -232,7 +232,7 @@ env:
 kubectl create -f elastic/metricbeat-kubernetes.yaml
 ```
 
-###3.4 Deploy App
+### 3.4 Deploy App
 Finally, deploy Cloud Voting App. You need to change the image name in `elastic/cloud-vote-all-in-one-redis-aks.yaml` to the name pushed to your registry. Also, you need to change Elastic APM related variables such as SECRET_TOKEN and SERVER_URL for APM instrumentation.
 ```buildoutcfg
 # Change image name in elastic/cloud-vote-all-in-one-redis-aks.yaml
@@ -262,5 +262,5 @@ Once App is running, you can get external IP with following command and access t
 ```buildoutcfg
 kubectl get service cloud-vote-front
 ```
-###3.5 Access to Kibana
+### 3.5 Access to Kibana
 Now, you can access to metrics and logs via Kibana. Find out metricbeat-* indices for metrics and filebeat-* indices for logs. You can find out apm-* indices for custom metrics of Prometheus in addition to usual APM data. And, you can also fully utilize Elastic Observability App in Kibana.
