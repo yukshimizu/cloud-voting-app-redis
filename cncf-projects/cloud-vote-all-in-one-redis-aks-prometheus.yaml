@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-vote-back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-vote-back
+  template:
+    metadata:
+      labels:
+        app: cloud-vote-back
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: cloud-vote-back
+        image: redis
+        ports:
+        - containerPort: 6379
+          name: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-vote-back
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: cloud-vote-back
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-vote-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-vote-front
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5 
+  template:
+    metadata:
+      labels:
+        app: cloud-vote-front
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "80"
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: cloud-vote-front
+        image: your image name
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 250m
+          limits:
+            cpu: 500m
+        env:
+        - name: REDIS
+          value: "cloud-vote-back"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-vote-front
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: cloud-vote-front

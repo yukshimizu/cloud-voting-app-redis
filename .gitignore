@@ -1,0 +1,11 @@
+/cncf-projects/cloud-vote-all-in-one-redis-aks-prometheus-real.yaml
+/cncf-projects/fluentd-daemonset-elasticsearch-rbac-real.yaml
+/cncf-projects/metricbeat-kubernetes-deployment-real.yaml
+/elastic/cloud-vote-all-in-one-redis-aks-real.yaml
+/elastic/filebeat-kubernetes-real.yaml
+/elastic/metricbeat-kubernetes-real.yaml
+/examples/autosharding/
+/examples/prometheus-alerting-rules/
+/venv/
+/docker-compose-elastic-real.yaml
+/.idea/

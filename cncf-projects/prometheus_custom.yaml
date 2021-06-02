@@ -1,0 +1,19 @@
+alertmanager:
+  ## If false, alertmanager will not be installed
+  ##
+  enabled: false
+
+server:
+  ## Prometheus server container name
+  ##
+  service:
+    type: LoadBalancer
+  ## https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write
+  ##
+  remoteWrite:
+    - url: "http://metricbeat-svc.kube-system.svc.cluster.local:9201/write"
+
+pushgateway:
+  ## If false, pushgateway will not be installed
+  ##
+  enabled: false

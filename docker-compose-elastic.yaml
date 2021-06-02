@@ -1,0 +1,21 @@
+version: '3'
+services:
+  cloud-vote-back:
+    image: redis
+    container_name: cloud-vote-back
+    ports:
+        - "6379:6379"
+
+  cloud-vote-front:
+    build: ./cloud-vote-elastic
+    image: cloud-vote-front
+    container_name: cloud-vote-front
+    environment:
+      REDIS: cloud-vote-back
+      SERVICE_NAME: cloud-voting
+      SECRET_TOKEN: APM Server secret token
+      SERVER_URL: APM Server URL
+      ENVIRONMENT: Development
+      PROMETHEUS_METRICS: "True"
+    ports:
+        - "8080:80"

@@ -1,0 +1,16 @@
+version: '3'
+services:
+  cloud-vote-back:
+    image: redis
+    container_name: cloud-vote-back
+    ports:
+        - "6379:6379"
+
+  cloud-vote-front:
+    build: ./cloud-vote-cncf
+    image: cloud-vote-front
+    container_name: cloud-vote-front
+    environment:
+      REDIS: cloud-vote-back
+    ports:
+        - "8080:80"
